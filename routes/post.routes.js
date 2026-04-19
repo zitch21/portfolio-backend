@@ -1,9 +1,11 @@
 // routes/post.routes.js
 const express = require('express');
+const multer = require('multer');
 const Post = require('../models/Post');
 const { protect } = require('../middleware/auth.middleware');
 const { memberOrAdmin } = require('../middleware/role.middleware');
-const upload = require('../middleware/upload');
+const { storage } = require('../config/cloudinary');
+const upload = multer({ storage });
 const router = express.Router();
 
 // ── GET /api/posts (Public: View all posts) ──
@@ -63,7 +65,7 @@ router.put('/:id', protect, memberOrAdmin, upload.single('coverImage'), async (r
     if (req.body.title) post.title = req.body.title;
     if (req.body.content) post.content = req.body.content;
     if (req.body.category) post.category = req.body.category;
-    if (req.file) post.coverImage = req.file.filename;
+    if (req.file) post.coverImage = req.file.path;
 
     await post.save();
     res.json(post);

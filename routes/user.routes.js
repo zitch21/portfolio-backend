@@ -1,22 +1,15 @@
 // portfolio-backend/routes/user.routes.js
 const express = require('express');
 const multer = require('multer');
+const { storage } = require('../config/cloudinary'); // ⬅️ NEW: Import Cloudinary
 const path = require('path');
 const User = require('../models/User');
 const Post = require('../models/Post');
 const { protect } = require('../middleware/auth.middleware');
 const router = express.Router();
 
-// ─── MULTER CONFIGURATION ───
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Ensure this folder exists in your backend root
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${req.user.id}-${Date.now()}${path.extname(file.originalname)}`);
-  }
-});
-const upload = multer({ storage });
+// ─── MULTER CLOUD CONFIGURATION ───
+const upload = multer({ storage }); // ⬅️ NEW: Uses Cloudinary instead of your local folder
 
 // ─── GET /api/users/search?q=name (Search Users) ───
 router.get('/search', async (req, res) => {
@@ -79,13 +72,15 @@ router.put('/:id/follow', protect, async (req, res) => {
   }
 });
 
-// ─── PUT /api/users/profile-pic (Upload Image) ───
+// ─── PUT /api/users/profile-pic (Upload Image to Cloud) ───
 router.put('/profile-pic', protect, upload.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'No image uploaded' });
 
     const user = await User.findById(req.user.id);
-    user.profilePic = req.file.filename; 
+    
+    // ⬅️ CHANGED: Cloudinary returns a full URL in req.file.path, not just a filename
+    user.profilePic = req.file.path; 
     await user.save();
 
     res.json({ message: 'Profile picture updated!', profilePic: user.profilePic });

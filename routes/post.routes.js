@@ -32,7 +32,7 @@ router.get('/:id', async (req, res) => {
 router.post('/', protect, memberOrAdmin, upload.single('coverImage'), async (req, res) => {
   try {
     const { title, content, category } = req.body;
-    const coverImage = req.file ? req.file.filename : ''; // Get the filename if an image was uploaded
+    const coverImage = req.file ? req.file.path : ''; // Get the full URL if an image was uploaded
 
     const post = await Post.create({ 
       title, 

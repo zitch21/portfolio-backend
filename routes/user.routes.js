@@ -79,8 +79,19 @@ router.put('/profile-pic', protect, upload.single('image'), async (req, res) => 
 
     const user = await User.findById(req.user.id);
     
+    // ─── NEW: Rate Limiting - Check if updated in last 24 hours (bypass for admins) ───
+    if (user.lastProfilePicUpdate && user.role !== 'admin') {
+      const lastUpdate = new Date(user.lastProfilePicUpdate);
+      const now = new Date();
+      const diffHours = (now - lastUpdate) / (1000 * 60 * 60);
+      if (diffHours < 24) {
+        return res.status(429).json({ message: 'You can only change your profile picture once a day.' });
+      }
+    }
+
     // ⬅️ CHANGED: Cloudinary returns a full URL in req.file.path, not just a filename
-    user.profilePic = req.file.path; 
+    user.profilePic = req.file.path;
+    user.lastProfilePicUpdate = new Date(); // ─── NEW: Update the timestamp ───
     await user.save();
 
     res.json({ message: 'Profile picture updated!', profilePic: user.profilePic });

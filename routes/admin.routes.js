@@ -11,6 +11,18 @@ const Message = require('../models/Message');
 const { protect } = require('../middleware/auth.middleware');
 const { adminOnly } = require('../middleware/role.middleware');
 
+// ─── ADMIN STATISTICS ───
+
+// GET /api/admin/stats (Admin: Get user statistics)
+router.get('/stats', protect, adminOnly, async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    res.json({ totalUsers });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // ─── USER MANAGEMENT ───
 
 // GET /api/admin/users (Admin: View all users)

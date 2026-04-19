@@ -10,6 +10,9 @@ const userSchema = new mongoose.Schema({
   status: { type: String, enum: ['active', 'inactive', 'pending'], default: 'active' },
   profilePic: { type: String, default: '' },
   
+  // ─── NEW: Rate Limiting for Profile Pic Updates ───
+  lastProfilePicUpdate: { type: Date },
+
   // ─── OTP Fields for Password Recovery ───
   resetPasswordOtp: { type: String },
   resetPasswordExpires: { type: Date },

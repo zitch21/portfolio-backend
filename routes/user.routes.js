@@ -6,6 +6,7 @@ const path = require('path');
 const User = require('../models/User');
 const Post = require('../models/Post');
 const { protect } = require('../middleware/auth.middleware');
+const { changePassword } = require('../controllers/userController');
 const router = express.Router();
 
 // ─── MULTER CLOUD CONFIGURATION ───
@@ -71,6 +72,9 @@ router.put('/:id/follow', protect, async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
+// ─── PUT /api/users/change-password (Protected User Password Update) ───
+router.put('/change-password', protect, changePassword);
 
 // ─── PUT /api/users/profile-pic (Upload Image to Cloud) ───
 router.put('/profile-pic', protect, upload.single('image'), async (req, res) => {

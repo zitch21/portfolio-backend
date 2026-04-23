@@ -10,6 +10,12 @@ const userSchema = new mongoose.Schema({
   status: { type: String, enum: ['active', 'inactive', 'pending'], default: 'active' },
   profilePic: { type: String, default: '' },
   
+  // ─── NEW: Profile Bio ───
+  bio: { type: String, default: '', maxlength: 500 },
+  
+  // ─── NEW: Saved Posts ───
+  savedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
+  
   // ─── NEW: Rate Limiting for Profile Pic Updates ───
   lastProfilePicUpdate: { type: Date },
 

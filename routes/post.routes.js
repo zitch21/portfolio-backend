@@ -118,4 +118,34 @@ router.put('/:id/like', protect, async (req, res) => {
   }
 });
 
+// ── PUT /api/posts/:id/bookmark (Protected: Toggle Bookmark) ──
+router.put('/:id/bookmark', protect, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ message: 'Post not found' });
+
+    const user = await User.findById(req.user._id);
+    
+    // Check if this post is already bookmarked by the user
+    const alreadyBookmarked = user.savedPosts.includes(post._id);
+
+    if (alreadyBookmarked) {
+      // UNBOOKMARK: Remove from saved posts
+      user.savedPosts = user.savedPosts.filter((postId) => postId.toString() !== post._id.toString());
+    } else {
+      // BOOKMARK: Add to saved posts
+      user.savedPosts.push(post._id);
+    }
+
+    await user.save();
+    
+    res.json({ 
+      message: alreadyBookmarked ? 'Post removed from saved posts' : 'Post saved successfully',
+      saved: !alreadyBookmarked 
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

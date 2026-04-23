@@ -76,6 +76,40 @@ router.put('/:id/follow', protect, async (req, res) => {
 // ─── PUT /api/users/change-password (Protected User Password Update) ───
 router.put('/change-password', protect, changePassword);
 
+// ─── PUT /api/users/bio (Protected: Update User Bio) ───
+router.put('/bio', protect, async (req, res) => {
+  try {
+    const { bio } = req.body;
+    
+    if (bio && bio.length > 500) {
+      return res.status(400).json({ message: 'Bio must be 500 characters or less' });
+    }
+    
+    const user = await User.findById(req.user.id);
+    user.bio = bio || '';
+    await user.save();
+    
+    res.json({ message: 'Bio updated successfully', bio: user.bio });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ─── GET /api/users/saved-posts (Protected: Get User's Saved Posts) ───
+router.get('/saved-posts', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).populate({
+      path: 'savedPosts',
+      populate: { path: 'author', select: 'name profilePic' },
+      options: { sort: { createdAt: -1 } }
+    });
+    
+    res.json(user.savedPosts);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // ─── PUT /api/users/profile-pic (Upload Image to Cloud) ───
 router.put('/profile-pic', protect, upload.single('image'), async (req, res) => {
   try {

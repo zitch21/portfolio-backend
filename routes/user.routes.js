@@ -28,6 +28,21 @@ router.get('/search', async (req, res) => {
   }
 });
 
+// ─── GET /api/users/saved-posts (Protected: Get User's Saved Posts) ───
+router.get('/saved-posts', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).populate({
+      path: 'savedPosts',
+      populate: { path: 'author', select: 'name profilePic' },
+      options: { sort: { createdAt: -1 } }
+    });
+    
+    res.json(user.savedPosts);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // ─── GET /api/users/:id (Get Public Profile & Their Posts) ───
 router.get('/:id', async (req, res) => {
   try {
@@ -90,21 +105,6 @@ router.put('/bio', protect, async (req, res) => {
     await user.save();
     
     res.json({ message: 'Bio updated successfully', bio: user.bio });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// ─── GET /api/users/saved-posts (Protected: Get User's Saved Posts) ───
-router.get('/saved-posts', protect, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).populate({
-      path: 'savedPosts',
-      populate: { path: 'author', select: 'name profilePic' },
-      options: { sort: { createdAt: -1 } }
-    });
-    
-    res.json(user.savedPosts);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

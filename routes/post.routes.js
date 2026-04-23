@@ -2,6 +2,7 @@
 const express = require('express');
 const multer = require('multer');
 const Post = require('../models/Post');
+const User = require('../models/User');
 const { protect } = require('../middleware/auth.middleware');
 const { memberOrAdmin } = require('../middleware/role.middleware');
 const { storage } = require('../config/cloudinary');
